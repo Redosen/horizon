@@ -64,6 +64,7 @@ class AdminIndexView(tables.DataTableView):
             # Gather our tenants to correlate against IDs
             try:
                 tenants = api.keystone.tenant_list(self.request, admin=True)
+                users = api.keystone.user_list(self.request)
             except:
                 tenants = []
                 msg = _('Unable to retrieve instance tenant information.')
@@ -71,6 +72,7 @@ class AdminIndexView(tables.DataTableView):
 
             full_flavors = SortedDict([(f.id, f) for f in flavors])
             tenant_dict = SortedDict([(t.id, t) for t in tenants])
+            user_dict = SortedDict([(u.id, u) for u in users])
             # Loop through instances to get flavor and tenant info.
             for inst in instances:
                 flavor_id = inst.flavor["id"]
@@ -87,4 +89,6 @@ class AdminIndexView(tables.DataTableView):
                     exceptions.handle(self.request, msg)
                 tenant = tenant_dict.get(inst.tenant_id, None)
                 inst.tenant_name = getattr(tenant, "name", None)
+                user = user_dict.get(inst.user_id, None)
+                inst.user_name = getattr(user, "name", None)
         return instances
